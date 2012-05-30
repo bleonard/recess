@@ -1,0 +1,83 @@
+## Recess
+
+You know... to break up your classes.
+
+### Inside
+
+You can make classes that completely encapsulate behavior and have a defined interface with a parent object.
+
+For example, let's define the behavior.
+
+    class TestInside1 < Recess::Inside::Base
+      parent_instance :foo
+  
+      def my_method
+        "yes: #{foo}"
+      end
+  
+      def other_method
+        "no"
+      end
+    end
+    
+This has methods that interact with the parent's foo method. This is then included within the parent.
+The parent also declares what method it wants from the inside class.
+
+    class TestContainer1
+      inside TestInside1, :my_method
+  
+      def initialize(val)
+        @val = val
+      end
+  
+      def foo
+        @val
+      end
+      
+    end
+
+Technically, calling the inside method, defines a method on the parent that delegates to the inner class. Note that in the above other_method is not actually available on the parent, but my_method is.
+The parent_instance method does something similar to get/set data on the parent.
+
+Why would you want to do such a thing?
+
+* TestInside1 is completely testable as a standalone class
+* The inner class can be shared among models but the surface area of the inside class is minimized to only what is needed
+* Understanding dependencies through these strict mechanisms helps understand the impact of changes to shared code
+
+### Outside
+
+The other functionality is for class methods and stretches the metaphor a bit.
+
+    module TestOutside1
+      recess_group :something do
+        def self.test_class_method
+          "class_level"
+        end
+    
+        def test_instance_method
+          "instance_level"
+        end
+      end
+  
+      recess_group :else do
+        def self.other_test_class_method
+          "class_level2"
+        end
+    
+        def other_test_instance_method
+          "instance_level2"
+        end
+      end
+    end
+
+    class TestOutsideExample1
+      outside TestOutside1, :something
+    end
+
+It's like doing an include but with a certain name. In the above, only the :something group is included into TestOutsideExample1.
+Again, this is mainly about understanding dependencies.
+
+Copyright (c) 2011 Brian Leonard, released under the MIT license
+
+
