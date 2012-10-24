@@ -4,8 +4,10 @@ module Recess::Game
       @game_with ||= []
     end
     
-    def game_with(rules_klazz)
-      send(:inside, rules_klazz, *rules_klazz.list)
+    def game_with(rules_klazz, options = {})
+      args = rules_klazz.list.clone
+      args << options
+      send(:inside, rules_klazz, *args)
       recess_list_of_games << rules_klazz
       
       unless method_defined? :recess_rules_game_object_mapping
