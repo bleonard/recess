@@ -11,7 +11,7 @@ class TestRules2 < Recess::Game::Rules
 end
 
 class TestGame1 < Recess::Game::Base
-  rules TestRules2
+  rules "TestRules2"
   
   def extra2
     "yes"
@@ -28,7 +28,7 @@ end
 
 class TestGame3 < Recess::Game::Base
   rules TestRules1
-  rules TestRules2
+  rules "TestRules2"
   
   def must_have_one
     
@@ -65,7 +65,7 @@ class TestGameObject1
   game_with TestRules2
   
   def recess_games
-    {"TestRules2" => TestGame1, "TestRules1" => TestGame3}
+    {"TestRules2" => "TestGame1", "TestRules1" => TestGame3}
   end
 end
 
@@ -126,7 +126,7 @@ describe "Containers" do
   
   it "should use the same instances if possible" do
     obj = TestGameObject1.new
-    obj.stub(:recess_games).and_return({"TestRules2" => TestGame3, "TestRules1" => TestGame3})
+    obj.stub(:recess_games).and_return({"TestRules2" => "TestGame3", "TestRules1" => TestGame3})
     obj.extra2.should == "other"
     obj.third.should == "333"
     

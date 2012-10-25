@@ -3,7 +3,7 @@ module Recess::Inside
     def recess_inside_instance_methods(from_base=nil)
       return [] unless @recess_inside_instance_methods
       return @recess_inside_instance_methods.keys unless from_base
-      (@recess_inside_base_classes[from_base] || []).uniq
+      (@recess_inside_base_classes[from_base.to_s] || []).uniq
     end
     
     def recess_inside_objects_options
@@ -12,13 +12,15 @@ module Recess::Inside
     
     def inside(what, *args)
       options = args.last.is_a?(::Hash) ? args.pop : {}
-      object_clazz = what
-      recess_inside_objects_options[object_clazz.to_s] = options
+      clazz_name = what.to_s
+      object_clazz = Recess::Util.constantize(clazz_name)
+      
+      recess_inside_objects_options[clazz_name] = options
       
       @recess_inside_instance_methods ||= {}
       @recess_inside_base_classes ||= {}
       
-      unless @recess_inside_base_classes[object_clazz]
+      unless @recess_inside_base_classes[clazz_name]
         if object_clazz.respond_to?(:insided)
           if object_clazz.method(:insided).arity == 1
             object_clazz.insided(self)
@@ -29,18 +31,20 @@ module Recess::Inside
       end
       
       object_clazz.all_parent_instance_methods.each do |used|
-        @recess_inside_base_classes[object_clazz] ||= []
-        @recess_inside_base_classes[object_clazz] << used
+        @recess_inside_base_classes[clazz_name] ||= []
+        @recess_inside_base_classes[clazz_name] << used
         
         @recess_inside_instance_methods[used] ||= []
-        @recess_inside_instance_methods[used] << object_clazz
+        @recess_inside_instance_methods[used] << clazz_name
       end
       
       unless method_defined? :recess_inside_instance_objects
-        define_method(:recess_inside_instance_objects) do |clazz|
-          data_method = self.class.recess_inside_objects_options[clazz.to_s][:data]
+        define_method(:recess_inside_instance_objects) do |the_name|
+          the_name = the_name.to_s
+          clazz = Recess::Util.constantize(the_name)
+          data_method = self.class.recess_inside_objects_options[the_name][:data]
           @recess_inside_instance_objects ||= {}
-          @recess_inside_instance_objects[clazz.to_s] ||= clazz.new(self, data_method)
+          @recess_inside_instance_objects[the_name] ||= clazz.new(self, data_method)
         end
       end
 
@@ -57,7 +61,7 @@ module Recess::Inside
         end
         
         define_method delegated do |*args|
-          recess_inside_instance_objects(object_clazz).send(delegated, *args)
+          recess_inside_instance_objects(clazz_name).send(delegated, *args)
         end
       end
     end

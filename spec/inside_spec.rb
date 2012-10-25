@@ -81,7 +81,7 @@ class TestContainer4
     @called_value
   end
   
-  inside TestInside4, :foo
+  inside "TestInside4", :foo
 end
 
 class TestExample1Data
@@ -119,6 +119,8 @@ describe "Containers" do
     TestContainer1.recess_inside_instance_methods.should =~ ["foo", "foo="]
     TestContainer1.recess_inside_instance_methods(TestInside1).should =~ ["foo", "foo="]
     TestContainer3.recess_inside_instance_methods(TestInside2).should =~ ["foo"]
+    TestContainer1.recess_inside_instance_methods("TestInside1").should =~ ["foo", "foo="]
+    TestContainer3.recess_inside_instance_methods("TestInside2").should =~ ["foo"]
   end
   
   it "should allow call through to super" do
